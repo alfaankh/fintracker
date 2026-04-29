@@ -1,12 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from './lib/supabase'
 
 export default function Home() {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
   const [showUserSelect, setShowUserSelect] = useState(false)
   const [currentUser, setCurrentUser] = useState('')
+  const [dbUsers, setDbUsers] = useState<any[]>([])
+
+  useEffect(() => {
+    supabase.from('users').select('*').then(({ data, error }) => {
+      if (data) setDbUsers(data)
+      if (error) console.error('Supabase error:', error)
+    })
+  }, [])
 
   const CORRECT_PIN = process.env.NEXT_PUBLIC_SHARED_PIN || '1234'
 
@@ -57,6 +66,9 @@ export default function Home() {
           </div>
           <div style={{ fontSize: 14, color: '#4a5568', marginTop: 8 }}>
             FinTracker is loading...
+          </div>
+          <div style={{ fontSize: 12, color: '#00d4b8', marginTop: 8 }}>
+            DB Users: {dbUsers.map(u => u.name).join(', ')}
           </div>
           <div style={{
             marginTop: 32,
@@ -158,7 +170,6 @@ export default function Home() {
           Family Finance OS
         </div>
 
-        {/* PIN DOTS */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 28 }}>
           {[0, 1, 2, 3].map(i => (
             <div key={i} style={{
@@ -177,7 +188,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* KEYPAD */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((key, i) => (
             <button
